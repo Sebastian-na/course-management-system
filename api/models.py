@@ -86,12 +86,12 @@ class Assignment(models.Model):
     description = models.TextField(default="")
     course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(null=True)
+    due_date = models.DateTimeField(null=True)
     
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['name', 'course'], name='unique_assignment_name_course'),
-            models.CheckConstraint(check=models.Q(expires_at__gt=models.F('created_at')), name='expires_at_gt_created_at')
+            models.CheckConstraint(check=models.Q(due_date__gt=models.F('created_at')), name='due_date_gt_created_at')
         ]
     def __str__(self):
         return f"{self.name} - ({self.course.name})"
