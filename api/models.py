@@ -51,12 +51,72 @@ class Professor(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
     def __str__(self):
-        return self.user.first_name + " " + self.user.last_name
+        return f"{self.user.first_name} {self.user.last_name} ({self.user.email})"
 
 class Student(models.Model):
     id = models.AutoField(primary_key=True, editable=False)                        
     user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
     def __str__(self):
-        return self.user.first_name + " " + self.user.last_name
+        return f"{self.user.first_name} {self.user.last_name} ({self.user.email})"
 
+class Course(models.Model):
+    id = models.AutoField(primary_key=True, editable=False)
+    name = models.CharField(max_length=100)
+    group = models.IntegerField()
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE, editable=False)
+    
+    def __str__(self):
+        return f"{self.name} - ({self.group})"
 
+class Enrollment(models.Model):
+    id = models.AutoField(primary_key=True, editable=False)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, editable=False)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
+    period = models.IntegerField()
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['student', 'course', 'period'], name='unique_enrollment')
+        ]
+    def __str__(self):
+        return f"{self.student.user.first_name} {self.student.user.last_name} - {self.course.name} - ({self.course.group})"
+
+class Assignment(models.Model):
+    id = models.AutoField(primary_key=True, editable=False)
+    name = models.CharField(max_length=100, default="Assignment")
+    description = models.TextField(default="")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'course'], name='unique_assignment_name_course'),
+            models.CheckConstraint(check=models.Q(expires_at__gt=models.F('created_at')), name='expires_at_gt_created_at')
+        ]
+    def __str__(self):
+        return f"{self.name} - ({self.course.name})"
+    
+class Submission(models.Model):
+    SENT = 'Sent'
+    GRADED = 'Graded'
+    STATUS_CHOICES = [
+        (SENT, 'Sent'),
+        (GRADED, 'Graded'),
+    ]
+    id = models.AutoField(primary_key=True, editable=False)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, editable=False)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, editable=False)
+    grade = models.IntegerField(null=True)
+    grade_comment = models.TextField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default=SENT)
+    def __str__(self):
+        return f"{self.student.user.first_name} {self.student.user.last_name} - {self.assignment.name} - ({self.assignment.course.name})"
+
+class File(models.Model):
+    id = models.AutoField(primary_key=True, editable=False)
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, editable=False, null=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True)
+    file = models.FileField(upload_to='files/')
+    def __str__(self):
+        return f"{self.file.name}"
