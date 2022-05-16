@@ -1,6 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+from .serializers import CourseSerializer, AssignmentSerializer
 from .permissions import isProfessor, isProfessorAndOwnsCourse
 from .models import Assignment, Professor, Course
 from django.utils import timezone
@@ -33,7 +35,7 @@ def create_assignment(request):
     )
     assignment.save()
 
-    return Response({"id": assignment.id, "name": assignment.name, "description": assignment.description, "due_date": assignment.due_date, "course_id": assignment.course.id})
+    return Response(AssignmentSerializer(assignment).data)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
@@ -49,5 +51,5 @@ def create_course(request):
     )
     course.save()
 
-    return Response({"id": course.id, "name": course.name, "group": course.group})
+    return Response(CourseSerializer(course).data)
 
