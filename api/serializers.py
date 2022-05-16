@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import User, Course, Assignment
+from .models import User, Course, Assignment, Submission
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'user_type')
+        fields = ('first_name', 'last_name', 'email', 'user_type')	
 
 class CourseSerializer(serializers.ModelSerializer):
     professor = serializers.SerializerMethodField()
@@ -23,3 +23,17 @@ class AssignmentSerializer(serializers.ModelSerializer):
     
     def get_course(self, obj):
         return CourseSerializer(obj.course).data
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    assignment = serializers.SerializerMethodField()
+    student = serializers.SerializerMethodField()
+    class Meta:
+        model = Submission
+        fields = ('assignment', 'student', 'created_at', 'grade', 'graded_comment', 'status')
+
+    def get_assignment(self, obj):
+        return AssignmentSerializer(obj.assignment).data
+    
+    def get_student(self, obj):
+        return UserSerializer(obj.student.user).data
+    

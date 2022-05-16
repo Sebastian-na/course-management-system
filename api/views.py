@@ -2,9 +2,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import CourseSerializer, AssignmentSerializer
-from .permissions import isProfessor, isProfessorAndOwnsCourse
-from .models import Assignment, Professor, Course
+from .serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer
+from .permissions import isProfessor, isProfessorAndOwnsCourse, isStudentAndEnrolled
+from .models import Assignment, Professor, Course, Student, Submission
 from django.utils import timezone
 import pytz
 
@@ -33,6 +33,34 @@ def create_assignment(request):
         due_date=due_date,
         course=course,
     )
+
+    return Response(AssignmentSerializer(assignment).data)
+
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
+def update_assignment(request, id):
+    """
+    Update an assignment
+    """
+    assignment = Assignment.objects.get(id=id)
+    # extract the date time year, month, day, hour, minute from the request if due_date has the format "YYYY-MM-DD HH:MM"
+    due_date = None
+    if "due_date" in request.data:
+        due_date = request.data["due_date"]
+        year = int(due_date[0:4])
+        month = int(due_date[5:7])
+        day = int(due_date[8:10])
+        hour = int(due_date[11:13])
+        minute = int(due_date[14:16])
+        # create a timezone aware datetime object
+        due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+        assignment.due_date = due_date
+    
+    if "name" in request.data:
+        assignment.name = request.data["name"]
+    if "description" in request.data:
+        assignment.description = request.data["description"]
+
     assignment.save()
 
     return Response(AssignmentSerializer(assignment).data)
@@ -49,7 +77,24 @@ def create_course(request):
         group=request.data["group"],
         professor=professor
     )
-    course.save()
 
     return Response(CourseSerializer(course).data)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated, isStudentAndEnrolled])
+def create_submission(request):
+    """
+    Create a submission
+    """
+
+    assignment = Assignment.objects.get(id=request.data["assignment_id"])
+    student = Student.objects.get(user=request.user)
+
+    submission = Submission.objects.create(
+        assignment=assignment,
+        student=student,
+    )
+
+    return Response(SubmissionSerializer(submission).data)
+    
 

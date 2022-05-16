@@ -12,4 +12,7 @@ urlpatterns = [
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('create/course/', views.create_course, name='create_course'),
     path("create/assignment/", views.create_assignment, name="create_assignment"),
+    path("update/assignment/<int:id>/", views.update_assignment, name="update_assignment"),
+    path("create/submission/", views.create_submission, name="create_submission"),
+
 ]
