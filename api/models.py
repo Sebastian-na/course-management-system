@@ -49,13 +49,13 @@ class User(AbstractUser):
 # Create your models here.
 class Professor(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
 class Student(models.Model):
     id = models.AutoField(primary_key=True, editable=False)                        
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
     def __str__(self):
         return self.user.first_name + " " + self.user.last_name
 
