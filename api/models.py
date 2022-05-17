@@ -72,6 +72,7 @@ class Enrollment(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
+    # period has the following format: YYYYSemester, example: 20192 (2019 second semester)
     period = models.IntegerField()
     class Meta:
         constraints = [
