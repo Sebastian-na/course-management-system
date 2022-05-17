@@ -1,12 +1,14 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 
 from .serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer, EnrollmentSerializer
 from .permissions import isProfessor, isStudent, isProfessorAndOwnsCourse, isStudentAndEnrolled
-from .models import Assignment, Professor, Course, Student, Submission, Enrollment
+from .models import Assignment, Professor, Course, Student, Submission, Enrollment, File
 from django.utils import timezone
 import pytz
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
@@ -25,6 +27,7 @@ def create_course(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
+@parser_classes([MultiPartParser])
 def create_assignment(request):
     """
     Create an assignment
@@ -48,6 +51,12 @@ def create_assignment(request):
         due_date=due_date,
         course=course,
     )
+
+    for file in request.FILES.values():
+        file = File.objects.create(
+            assignment=assignment,
+            file=file
+        )    
 
     return Response(AssignmentSerializer(assignment).data)
 
@@ -99,6 +108,7 @@ def enroll_student(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isStudentAndEnrolled])
+@parser_classes([MultiPartParser])
 def create_submission(request):
     """
     Create a submission
@@ -112,6 +122,12 @@ def create_submission(request):
         student=student,
 
     )
+
+    for file in request.FILES.values():
+        file = File.objects.create(
+            assignment=assignment,
+            file=file
+        )    
 
     return Response(SubmissionSerializer(submission).data)
 

@@ -163,6 +163,43 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# media files
+.pdf
+.mp3
+.mp4
+.mov
+.avi
+.mpg
+.mpeg
+.wav
+.ogg
+.jpg
+.jpeg
+.png
+.gif
+.ppt
+.pptx
+.doc
+.docx
+.xls
+.xlsx
+.zip
+.gz
+.bz2
+.7z
+.rar
+.tar
+.tar.gz
+.tar.bz2
+.tgz
+.exe
+.dmg
+.iso
+.apk
+.ipa
+.app
+.zip
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

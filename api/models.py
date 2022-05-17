@@ -117,7 +117,7 @@ class Submission(models.Model):
 class File(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     submission = models.ForeignKey(Submission, on_delete=models.CASCADE, editable=False, null=True)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True)
-    file = models.FileField(upload_to='files/')
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True, editable=False)
+    file = models.FileField(null=False)
     def __str__(self):
         return f"{self.file.name}"
