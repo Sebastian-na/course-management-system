@@ -131,7 +131,7 @@ def create_submission(request):
 
     return Response(SubmissionSerializer(submission).data)
 
-@api_view(["POST"])
+@api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
 def update_submission(request, id):
     """
