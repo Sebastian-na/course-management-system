@@ -49,13 +49,13 @@ class User(AbstractUser):
 # Create your models here.
 class Professor(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, )
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.user.email})"
         
 class Student(models.Model):
     id = models.AutoField(primary_key=True, editable=False)                        
-    user = models.OneToOneField(User, on_delete=models.CASCADE, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, )
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} ({self.user.email})"
 
@@ -63,15 +63,15 @@ class Course(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     name = models.CharField(max_length=100)
     group = models.IntegerField()
-    professor = models.ForeignKey(Professor, on_delete=models.CASCADE, editable=False)
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE, )
     
     def __str__(self):
         return f"{self.name} - ({self.group})"
 
 class Enrollment(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, editable=False)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, )
     # period has the following format: YYYYSemester, example: 20192 (2019 second semester)
     period = models.IntegerField()
     class Meta:
@@ -85,7 +85,7 @@ class Assignment(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
     name = models.CharField(max_length=100, default="Assignment")
     description = models.TextField(default="")
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, editable=False)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, )
     created_at = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField(null=True)
     
@@ -105,8 +105,8 @@ class Submission(models.Model):
         (GRADED, 'Graded'),
     ]
     id = models.AutoField(primary_key=True, editable=False)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, editable=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, editable=False)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, )
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, )
     grade = models.IntegerField(null=True)
     grade_comment = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -116,8 +116,8 @@ class Submission(models.Model):
 
 class File(models.Model):
     id = models.AutoField(primary_key=True, editable=False)
-    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, editable=False, null=True)
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True, editable=False)
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, null=True)
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True, )
     file = models.FileField(null=False)
     def __str__(self):
         return f"{self.file.name}"
