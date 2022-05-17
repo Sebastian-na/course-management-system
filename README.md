@@ -46,4 +46,4 @@ Now you should create a superuser user to log into the django admin panel
 ### PUT
 `Professor only`  [/api/update/assignment/id/](#update-assignment)
 
-`Professor only`	[/api/update/submission/id/](#update submission) (to grade a submission uploaded by a student)
+`Professor only`	[/api/update/submission/id/](#update submission)
