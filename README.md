@@ -25,14 +25,14 @@ python manage.py runserver
 
 Now you should create a superuser user to log into the django admin panel
 
-##Considerations
+## Considerations
 - The app is using sqlite as its database for the sake of simplicity. (With other databases such as postgresql it would have been necessary to locally and manually create a database). 
 - The app uses jwt authentication, so with every request the Authorization header must be set to something like: Bearer {token} to uniquely identify the user who makes the http request. (except for the login endpoint).
 - For the sake of simplicity the .env file is included in the repository.
 
-##Endpoints
+## Endpoints
 
-###POST
+### POST
 `User (Professor and Student) with an active account `[/api/token/](#login)
 
 `Professor only`  [/api/create/assignment/](#create-assignment) 
@@ -43,7 +43,7 @@ Now you should create a superuser user to log into the django admin panel
 
 `Student only` [/api/student/enroll/](#enroll-student)
 
-###PUT
+### PUT
 `Professor only`  [/api/update/assignment/id/](#update-assignment)
 
 `Professor only`	[/api/update/submission/id/](#update submission) (to grade a submission uploaded by a student)
