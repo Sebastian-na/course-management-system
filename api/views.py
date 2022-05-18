@@ -9,6 +9,7 @@ from .models import Assignment, Professor, Course, Student, Submission, Enrollme
 from django.utils import timezone
 import pytz
 
+
 @api_view(["POST"])
 def register_professor(request):
     """
@@ -23,6 +24,7 @@ def register_professor(request):
     user.set_password(request.data["password"])
     user.save()
     return Response(UserSerializer(user).data)
+
 
 @api_view(["POST"])
 def register_student(request):
@@ -39,6 +41,7 @@ def register_student(request):
     user.save()
     return Response(UserSerializer(user).data)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
 def create_course(request):
@@ -53,6 +56,7 @@ def create_course(request):
     )
 
     return Response(CourseSerializer(course).data)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
@@ -73,7 +77,8 @@ def create_assignment(request):
             hour = int(due_date[11:13])
             minute = int(due_date[14:16])
             # create a timezone aware datetime object
-            due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+            due_date = timezone.datetime(
+                year, month, day, hour, minute, tzinfo=pytz.utc)
         except:
             return Response({"error": "Invalid due date format"}, status=400)
 
@@ -88,9 +93,10 @@ def create_assignment(request):
         file = File.objects.create(
             assignment=assignment,
             file=file
-        )    
+        )
 
     return Response(AssignmentSerializer(assignment).data)
+
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
@@ -110,11 +116,12 @@ def update_assignment(request, id):
             hour = int(due_date[11:13])
             minute = int(due_date[14:16])
             # create a timezone aware datetime object
-            due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+            due_date = timezone.datetime(
+                year, month, day, hour, minute, tzinfo=pytz.utc)
             assignment.due_date = due_date
         except:
             return Response({"error": "Invalid date format"}, status=400)
-    
+
     if "name" in request.data:
         assignment.name = request.data["name"]
     if "description" in request.data:
@@ -141,6 +148,7 @@ def enroll_student(request):
     )
     return Response(EnrollmentSerializer(enrollment).data)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isStudentAndEnrolled])
 @parser_classes([MultiPartParser])
@@ -162,9 +170,10 @@ def create_submission(request):
         file = File.objects.create(
             assignment=assignment,
             file=file
-        )    
+        )
 
     return Response(SubmissionSerializer(submission).data)
+
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
@@ -182,6 +191,7 @@ def update_submission(request, id):
 
     return Response(SubmissionSerializer(submission).data)
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
 def get_students_enrolled_in_course(request):
@@ -192,6 +202,7 @@ def get_students_enrolled_in_course(request):
     enrollments = Enrollment.objects.filter(course=course)
     return Response(EnrollmentSerializer(enrollments, many=True).data)
 
+
 @api_view(["GET"])
 def get_submissions_for_assignment(request, assignment_id):
     """
@@ -200,9 +211,3 @@ def get_submissions_for_assignment(request, assignment_id):
     assignment = Assignment.objects.get(id=assignment_id)
     submissions = Submission.objects.filter(assignment=assignment)
     return Response(SubmissionSerializer(submissions, many=True).data)
-
-
-
-
-    
-

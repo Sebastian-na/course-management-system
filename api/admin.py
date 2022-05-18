@@ -5,13 +5,16 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
+
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
 
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
-    user_type = forms.ChoiceField(choices=User.USER_TYPE_CHOICES, widget=forms.Select)
+    password2 = forms.CharField(
+        label='Password confirmation', widget=forms.PasswordInput)
+    user_type = forms.ChoiceField(
+        choices=User.USER_TYPE_CHOICES, widget=forms.Select)
 
     class Meta:
         model = User
@@ -33,6 +36,7 @@ class UserCreationForm(forms.ModelForm):
             user.save()
         return user
 
+
 class UserChangeForm(forms.ModelForm):
     """A form for updating users. Includes all the fields on
     the user, but replaces the password field with admin's
@@ -40,17 +44,20 @@ class UserChangeForm(forms.ModelForm):
     """
     password = ReadOnlyPasswordHashField()
     email = forms.CharField(disabled=True)
-    user_type = forms.ChoiceField(choices=User.USER_TYPE_CHOICES, widget=forms.Select, disabled=True)
+    user_type = forms.ChoiceField(
+        choices=User.USER_TYPE_CHOICES, widget=forms.Select, disabled=True)
 
     class Meta:
         model = User
-        fields = ('password', 'user_type', 'is_active', 'first_name', 'last_name')
+        fields = ('password', 'user_type', 'is_active',
+                  'first_name', 'last_name')
 
     def clean_password(self):
         # Regardless of what the user provides, return the initial value.
         # This is done here, rather than on the field, because the
         # field does not have access to the initial value
         return self.initial["password"]
+
 
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
@@ -60,10 +67,12 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'user_type', 'is_active', 'first_name', 'last_name')
+    list_display = ('email', 'user_type', 'is_active',
+                    'first_name', 'last_name')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'user_type')}),
+        ('Personal info', {
+         'fields': ('first_name', 'last_name', 'user_type')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -71,11 +80,12 @@ class UserAdmin(BaseUserAdmin):
         (None, {
             'classes': ('wide',),
             'fields': ('email', 'password1', 'password2', 'user_type', 'first_name', 'last_name')}
-        ),
+         ),
     )
     search_fields = ('email',)
     ordering = ('email',)
     filter_horizontal = ()
+
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Professor)
@@ -85,4 +95,3 @@ admin.site.register(Assignment)
 admin.site.register(Submission)
 admin.site.register(Enrollment)
 admin.site.register(File)
-

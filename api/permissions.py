@@ -1,6 +1,7 @@
 from rest_framework import permissions
 from .models import User, Course, Submission, Enrollment, Student
 
+
 class isProfessor(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -10,7 +11,8 @@ class isProfessor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return True
-        
+
+
 class isProfessorAndOwnsCourse(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -23,6 +25,7 @@ class isProfessorAndOwnsCourse(permissions.BasePermission):
             return True
         return False
 
+
 class isStudent(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -32,6 +35,7 @@ class isStudent(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return True
+
 
 class isStudentAndEnrolled(permissions.BasePermission):
 
@@ -45,4 +49,3 @@ class isStudentAndEnrolled(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return True
-
