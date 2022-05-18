@@ -36,14 +36,17 @@ def create_assignment(request):
     # extract the date time year, month, day, hour, minute from the request if due_date has the format "YYYY-MM-DD HH:MM"
     due_date = None
     if "due_date" in request.data:
-        due_date = request.data["due_date"]
-        year = int(due_date[0:4])
-        month = int(due_date[5:7])
-        day = int(due_date[8:10])
-        hour = int(due_date[11:13])
-        minute = int(due_date[14:16])
-        # create a timezone aware datetime object
-        due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+        try:
+            due_date = request.data["due_date"]
+            year = int(due_date[0:4])
+            month = int(due_date[5:7])
+            day = int(due_date[8:10])
+            hour = int(due_date[11:13])
+            minute = int(due_date[14:16])
+            # create a timezone aware datetime object
+            due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+        except:
+            return Response({"error": "Invalid due date format"}, status=400)
 
     assignment = Assignment.objects.create(
         name=request.data["name"],
@@ -70,15 +73,18 @@ def update_assignment(request, id):
     # extract the date time year, month, day, hour, minute from the request if due_date has the format "YYYY-MM-DD HH:MM"
     due_date = None
     if "due_date" in request.data:
-        due_date = request.data["due_date"]
-        year = int(due_date[0:4])
-        month = int(due_date[5:7])
-        day = int(due_date[8:10])
-        hour = int(due_date[11:13])
-        minute = int(due_date[14:16])
-        # create a timezone aware datetime object
-        due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
-        assignment.due_date = due_date
+        try:
+            due_date = request.data["due_date"]
+            year = int(due_date[0:4])
+            month = int(due_date[5:7])
+            day = int(due_date[8:10])
+            hour = int(due_date[11:13])
+            minute = int(due_date[14:16])
+            # create a timezone aware datetime object
+            due_date = timezone.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
+            assignment.due_date = due_date
+        except:
+            return Response({"error": "Invalid date format"}, status=400)
     
     if "name" in request.data:
         assignment.name = request.data["name"]
