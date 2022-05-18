@@ -3,9 +3,9 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 
-from .serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer, EnrollmentSerializer
+from .serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer, EnrollmentSerializer, UserSerializer
 from .permissions import isProfessor, isStudent, isProfessorAndOwnsCourse, isStudentAndEnrolled
-from .models import Assignment, Professor, Course, Student, Submission, Enrollment, File
+from .models import Assignment, Professor, Course, Student, Submission, Enrollment, File, User
 from django.utils import timezone
 import pytz
 
@@ -152,6 +152,56 @@ def update_submission(request, id):
     submission.save()
 
     return Response(SubmissionSerializer(submission).data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
+def get_students_enrolled_in_course(request):
+    """
+    Get all students enrolled in a course
+    """
+    course = Course.objects.get(id=request.data["course_id"])
+    enrollments = Enrollment.objects.filter(course=course)
+    return Response(EnrollmentSerializer(enrollments, many=True).data)
+
+@api_view(["GET"])
+def get_submissions_for_assignment(request, assignment_id):
+    """
+    Get all submissions for an assignment
+    """
+    assignment = Assignment.objects.get(id=assignment_id)
+    submissions = Submission.objects.filter(assignment=assignment)
+    return Response(SubmissionSerializer(submissions, many=True).data)
+
+@api_view(["POST"])
+def register_professor(request):
+    """
+    Register a professor
+    """
+    user = User.objects.create(
+        email=request.data["email"],
+        first_name=request.data["first_name"],
+        last_name=request.data["last_name"],
+        user_type=User.PROFESSOR
+    )
+    user.set_password(request.data["password"])
+    user.save()
+    return Response(UserSerializer(user).data)
+
+@api_view(["POST"])
+def register_student(request):
+    """
+    Register a student
+    """
+    user = User.objects.create(
+        email=request.data["email"],
+        first_name=request.data["first_name"],
+        last_name=request.data["last_name"],
+        user_type=User.STUDENT
+    )
+    user.set_password(request.data["password"])
+    user.save()
+    return Response(UserSerializer(user).data)
+
 
     
 

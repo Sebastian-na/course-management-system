@@ -15,5 +15,9 @@ urlpatterns = [
     path("update/assignment/<int:id>/", views.update_assignment, name="update_assignment"),
     path("create/submission/", views.create_submission, name="create_submission"),
     path("update/submission/<int:id>/", views.update_submission, name="update_submission"),
-    path("student/enroll/", views.enroll_student, name="enroll_student"),
+    path("enroll/student/", views.enroll_student, name="enroll_student"),
+    path("students/course/", views.get_students_enrolled_in_course, name="get_students_enroll_in_course"),
+    path("register/professor/", views.register_professor, name="register_professor"),
+    path("register/student/", views.register_student, name="register_student"),
+    path("submissions/<int:assignment_id>/", views.get_submissions_for_assignment, name="get_submissions_for_assignment"),
 ]
