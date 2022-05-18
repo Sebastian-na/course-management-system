@@ -1,13 +1,16 @@
+from django.http import QueryDict
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from django.utils import timezone
+import pytz
 
 from .serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer, EnrollmentSerializer, UserSerializer
 from .permissions import isProfessor, isStudent, isProfessorAndOwnsCourse, isStudentAndEnrolled
 from .models import Assignment, Professor, Course, Student, Submission, Enrollment, File, User
-from django.utils import timezone
-import pytz
+
 
 
 @api_view(["POST"])
@@ -15,15 +18,13 @@ def register_professor(request):
     """
     Register a professor
     """
-    user = User.objects.create(
-        email=request.data["email"],
-        first_name=request.data["first_name"],
-        last_name=request.data["last_name"],
-        user_type=User.PROFESSOR
-    )
-    user.set_password(request.data["password"])
-    user.save()
-    return Response(UserSerializer(user).data)
+    data = QueryDict.copy(request.data)
+    data['user_type'] = User.PROFESSOR
+    serializer = UserSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -31,15 +32,13 @@ def register_student(request):
     """
     Register a student
     """
-    user = User.objects.create(
-        email=request.data["email"],
-        first_name=request.data["first_name"],
-        last_name=request.data["last_name"],
-        user_type=User.STUDENT
-    )
-    user.set_password(request.data["password"])
-    user.save()
-    return Response(UserSerializer(user).data)
+    data = QueryDict.copy(request.data)
+    data['user_type'] = User.STUDENT
+    serializer = UserSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -49,13 +48,13 @@ def create_course(request):
     Create a course
     """
     professor = Professor.objects.get(user=request.user)
-    course = Course.objects.create(
-        name=request.data["name"],
-        group=request.data["group"],
-        professor=professor
-    )
-
-    return Response(CourseSerializer(course).data)
+    data = QueryDict.copy(request.data)
+    data['professor'] = professor
+    serializer = CourseSerializer(data=data, context={'professor': professor})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -65,38 +64,23 @@ def create_assignment(request):
     """
     Create an assignment
     """
-    course = Course.objects.get(id=request.data["course_id"])
-    # extract the date time year, month, day, hour, minute from the request if due_date has the format "YYYY-MM-DD HH:MM"
-    due_date = None
-    if "due_date" in request.data:
-        try:
-            due_date = request.data["due_date"]
-            year = int(due_date[0:4])
-            month = int(due_date[5:7])
-            day = int(due_date[8:10])
-            hour = int(due_date[11:13])
-            minute = int(due_date[14:16])
-            # create a timezone aware datetime object
-            due_date = timezone.datetime(
-                year, month, day, hour, minute, tzinfo=pytz.utc)
-        except:
-            return Response({"error": "Invalid due date format"}, status=400)
+    try:
+        course = Course.objects.get(id=request.data.get("course_id"))
+    except:
+        return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
-    assignment = Assignment.objects.create(
-        name=request.data["name"],
-        description=request.data["description"],
-        due_date=due_date,
-        course=course,
-    )
-
-    for file in request.FILES.values():
-        file = File.objects.create(
-            assignment=assignment,
-            file=file
-        )
-
-    return Response(AssignmentSerializer(assignment).data)
-
+    data = QueryDict.copy(request.data)
+    data['course'] = course
+    serializer = AssignmentSerializer(data=data, context={'course': course})
+    if serializer.is_valid():
+        assignment = serializer.save()
+        for file in request.FILES.values():
+            file = File.objects.create(
+                assignment=assignment,
+                file=file
+            )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
@@ -105,31 +89,12 @@ def update_assignment(request, id):
     Update an assignment
     """
     assignment = Assignment.objects.get(id=id)
-    # extract the date time year, month, day, hour, minute from the request if due_date has the format "YYYY-MM-DD HH:MM"
-    due_date = None
-    if "due_date" in request.data:
-        try:
-            due_date = request.data["due_date"]
-            year = int(due_date[0:4])
-            month = int(due_date[5:7])
-            day = int(due_date[8:10])
-            hour = int(due_date[11:13])
-            minute = int(due_date[14:16])
-            # create a timezone aware datetime object
-            due_date = timezone.datetime(
-                year, month, day, hour, minute, tzinfo=pytz.utc)
-            assignment.due_date = due_date
-        except:
-            return Response({"error": "Invalid date format"}, status=400)
+    serializer = AssignmentSerializer(assignment, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    if "name" in request.data:
-        assignment.name = request.data["name"]
-    if "description" in request.data:
-        assignment.description = request.data["description"]
-
-    assignment.save()
-
-    return Response(AssignmentSerializer(assignment).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -139,14 +104,16 @@ def enroll_student(request):
     Enroll a student in a course
     """
     student = Student.objects.get(user=request.user)
-    course = Course.objects.get(id=request.data["course_id"])
-    period = request.data["period"]
-    enrollment = Enrollment.objects.create(
-        course=course,
-        student=student,
-        period=period
-    )
-    return Response(EnrollmentSerializer(enrollment).data)
+    try: 
+        course = Course.objects.get(id=request.data.get("course_id"))
+    except:
+        return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = EnrollmentSerializer(data=request.data, context={'student': student, 'course': course})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
@@ -156,23 +123,26 @@ def create_submission(request):
     """
     Create a submission
     """
+    try:
+        assignment = Assignment.objects.get(id=request.data["assignment_id"])
+    except:
+        return Response({"error": "Assignment does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
-    assignment = Assignment.objects.get(id=request.data["assignment_id"])
     student = Student.objects.get(user=request.user)
+    data = QueryDict.copy(request.data)
+    data["student"] = student
+    data["assignment"] = assignment
+    serializer = SubmissionSerializer(data=request.data, context={'student': student, 'assignment': assignment})
+    if serializer.is_valid():
+        submission = serializer.save()
+        for file in request.FILES.values():
+            file = File.objects.create(
+                submission=submission,
+                file=file
+            )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    submission = Submission.objects.create(
-        assignment=assignment,
-        student=student,
-
-    )
-
-    for file in request.FILES.values():
-        file = File.objects.create(
-            assignment=assignment,
-            file=file
-        )
-
-    return Response(SubmissionSerializer(submission).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["PUT"])
@@ -181,15 +151,17 @@ def update_submission(request, id):
     """
     Update a submission
     """
-    submission = Submission.objects.get(id=id)
-    if "grade" in request.data:
-        submission.grade = request.data["grade"]
-        submission.status = Submission.GRADED
-    if "grade_comment" in request.data:
-        submission.grade_comment = request.data["grade_comment"]
-    submission.save()
+    try:
+        submission = Submission.objects.get(id=id)
+    except:
+        return Response({"error": "Submission does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = SubmissionSerializer(submission, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    return Response(SubmissionSerializer(submission).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
@@ -198,7 +170,10 @@ def get_students_enrolled_in_course(request):
     """
     Get all students enrolled in a course
     """
-    course = Course.objects.get(id=request.data["course_id"])
+    try:
+        course = Course.objects.get(id=request.data["course_id"])
+    except:
+        return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
     enrollments = Enrollment.objects.filter(course=course)
     return Response(EnrollmentSerializer(enrollments, many=True).data)
 
@@ -208,6 +183,9 @@ def get_submissions_for_assignment(request, assignment_id):
     """
     Get all submissions for an assignment
     """
-    assignment = Assignment.objects.get(id=assignment_id)
+    try:
+        assignment = Assignment.objects.get(id=assignment_id)
+    except:
+        return Response({"error": "Assignment does not exist"}, status=status.HTTP_400_BAD_REQUEST)
     submissions = Submission.objects.filter(assignment=assignment)
     return Response(SubmissionSerializer(submissions, many=True).data)

@@ -21,7 +21,11 @@ class isProfessorAndOwnsCourse(permissions.BasePermission):
         return False
 
     def has_object_permission(self, request, view, obj):
-        if Course.objects.get(id=request.data["course_id"]).professor.user == request.user:
+        try:
+            course = Course.objects.get(id=request.data["course_id"])
+        except:
+            return False
+        if course.professor.user == request.user:
             return True
         return False
 
@@ -41,8 +45,11 @@ class isStudentAndEnrolled(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.user_type == User.STUDENT:
-            student = Student.objects.get(user=request.user)
-            course = Course.objects.get(id=request.data["course_id"])
+            try:
+                student = Student.objects.get(user=request.user)
+                course = Course.objects.get(id=request.data["course_id"])
+            except:
+                return False
             if Enrollment.objects.filter(student=student, course=course).exists():
                 return True
         return False
