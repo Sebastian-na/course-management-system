@@ -9,6 +9,35 @@ from .models import Assignment, Professor, Course, Student, Submission, Enrollme
 from django.utils import timezone
 import pytz
 
+@api_view(["POST"])
+def register_professor(request):
+    """
+    Register a professor
+    """
+    user = User.objects.create(
+        email=request.data["email"],
+        first_name=request.data["first_name"],
+        last_name=request.data["last_name"],
+        user_type=User.PROFESSOR
+    )
+    user.set_password(request.data["password"])
+    user.save()
+    return Response(UserSerializer(user).data)
+
+@api_view(["POST"])
+def register_student(request):
+    """
+    Register a student
+    """
+    user = User.objects.create(
+        email=request.data["email"],
+        first_name=request.data["first_name"],
+        last_name=request.data["last_name"],
+        user_type=User.STUDENT
+    )
+    user.set_password(request.data["password"])
+    user.save()
+    return Response(UserSerializer(user).data)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
@@ -172,35 +201,7 @@ def get_submissions_for_assignment(request, assignment_id):
     submissions = Submission.objects.filter(assignment=assignment)
     return Response(SubmissionSerializer(submissions, many=True).data)
 
-@api_view(["POST"])
-def register_professor(request):
-    """
-    Register a professor
-    """
-    user = User.objects.create(
-        email=request.data["email"],
-        first_name=request.data["first_name"],
-        last_name=request.data["last_name"],
-        user_type=User.PROFESSOR
-    )
-    user.set_password(request.data["password"])
-    user.save()
-    return Response(UserSerializer(user).data)
 
-@api_view(["POST"])
-def register_student(request):
-    """
-    Register a student
-    """
-    user = User.objects.create(
-        email=request.data["email"],
-        first_name=request.data["first_name"],
-        last_name=request.data["last_name"],
-        user_type=User.STUDENT
-    )
-    user.set_password(request.data["password"])
-    user.save()
-    return Response(UserSerializer(user).data)
 
 
     
