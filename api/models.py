@@ -139,7 +139,7 @@ class File(models.Model):
         Submission, on_delete=models.CASCADE, null=True)
     assignment = models.ForeignKey(
         Assignment, on_delete=models.CASCADE, null=True, )
-    file = models.FileField(null=False)
+    file = models.FileField(null=False, upload_to="media/")
 
     def __str__(self):
         return f"{self.file.name}"
