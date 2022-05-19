@@ -27,7 +27,7 @@ Now you should create a superuser user to log into the django admin panel
 
 ## Considerations
 - The app is using sqlite as its database for the sake of simplicity. (With other databases such as postgresql it would have been necessary to locally and manually create a database). 
-- The app uses jwt authentication, so with every request the Authorization header must be set to something like: Bearer {token} to uniquely identify the user who makes the http request. (except for the login endpoint).
+- The app uses jwt authentication, so with every request the Authorization header must be set to something like: Bearer {token} to uniquely identify the user who makes the http request. (except for the auth endpoints).
 - For the sake of simplicity the .env file is included in the repository.
 - [Here](https://web.postman.co/workspace/e90f4008-b6b4-4c3c-b5ab-12861c561b54) is a postman workspace to see how http requests must be made.
 - [Here](https://drawsql.app/platzi-1/diagrams/hi) is the ER diagram of the database.
@@ -40,6 +40,10 @@ Now you should create a superuser user to log into the django admin panel
 `Professor only`  [/api/professors/coursestudents/](#get-submissions)
 
 ### POST
+[/api/auth/register/professor/](#register-professor)
+
+[/api/auth/register/student/](#register-student)
+
 `User (Professor and Student) with an active account `[/api/auth/token/](#login)
 
 `Professor only`  [/api/professors/assignment/](#create-assignment) 
@@ -54,18 +58,4 @@ Now you should create a superuser user to log into the django admin panel
 `Professor only`  [/api/professors/assignment/id/](#update-assignment)
 
 `Professor only`  [/api/professors/submission/id/](#update-submission)                                                                  |
-
-If user exists and his credentials are correct
-
-**Response**
-
-```
-{
-    "access": access_token,
-	"refresh": refresh_token
-}
-
-```
-
-This access token would be necessary for future requests that require user identification. It should be set in the Authorization header as Bearer token.
 
