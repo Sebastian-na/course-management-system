@@ -1,9 +1,7 @@
 from rest_framework.validators import UniqueValidator
 from rest_framework import serializers
 from .models import User, Course, Assignment, Submission, Enrollment
-from django.contrib.auth.hashers import make_password
 from .validators import date_greater_than_now, period_validator
-import pytz
 
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True)
