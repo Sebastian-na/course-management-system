@@ -1,7 +1,7 @@
 # Course Management System
 
 ## Live version
-A live version of the app lives here https://damp-savannah-75479.herokuapp.com (you can make http requests to this host if you want to)
+A live version of the app lives here https://damp-savannah-75479.herokuapp.com (you can make http requests to this host if you want to).
 
 ## Installation
 Clone the github repository
