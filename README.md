@@ -34,21 +34,25 @@ Now you should create a superuser user to log into the django admin panel
 
 ## Endpoints
 
+### GET
+`Professor only`  [/api/professors/submissions/id/](#get-submissions)
+`Professor only`  [/api/professors/coursestudents/](#get-submissions)
+
 ### POST
-`User (Professor and Student) with an active account `[/api/token/](#login)
+`User (Professor and Student) with an active account `[/api/auth/token/](#login)
 
-`Professor only`  [/api/create/assignment/](#create-assignment) 
+`Professor only`  [/api/professors/assignment/](#create-assignment) 
 
-`Professor only`  [/api/create/course/](#create-course) 
+`Professor only`  [/api/professors/course/](#create-course) 
 
-`Student only`  [/api/create/submission/](#create-submission) 
+`Student only`  [/api/students/submission/](#create-submission) 
 
-`Student only` [/api/student/enroll/](#enroll-student)
+`Student only` [/api/students/enroll/](#enroll-student)
 
 ### PUT
-`Professor only`  [/api/update/assignment/id/](#update-assignment)
+`Professor only`  [/api/professors/assignment/id/](#update-assignment)
 
-`Professor only`  [/api/update/submission/id/](#update-submission)
+`Professor only`  [/api/professors/submission/id/](#update-submission)
 
 ## Endpoints detail
 
