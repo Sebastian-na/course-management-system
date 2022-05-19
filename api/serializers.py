@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import User, Course, Assignment, Submission, Enrollment
 from .validators import date_greater_than_now, period_validator
 
+
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
@@ -13,7 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'email', 'user_type', 'password')
+        fields = ('id', 'first_name', 'last_name',
+                  'email', 'user_type', 'password')
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
@@ -29,7 +31,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ('id','name', 'group', 'professor')
+        fields = ('id', 'name', 'group', 'professor')
 
     def get_professor(self, obj):
         return UserSerializer(obj.professor.user).data
@@ -42,11 +44,12 @@ class AssignmentSerializer(serializers.ModelSerializer):
     course = serializers.SerializerMethodField()
     name = serializers.CharField(required=True)
     description = serializers.CharField(required=True)
-    due_date = serializers.DateTimeField(required=True, input_formats=['%Y-%m-%d %H:%M'], validators=[date_greater_than_now])
+    due_date = serializers.DateTimeField(required=True, input_formats=[
+                                         '%Y-%m-%d %H:%M'], validators=[date_greater_than_now])
 
     class Meta:
         model = Assignment
-        fields = ('id','name', 'description', 'due_date', 'course')
+        fields = ('id', 'name', 'description', 'due_date', 'course')
 
     def get_course(self, obj):
         return CourseSerializer(obj.course).data
@@ -56,7 +59,8 @@ class AssignmentSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
-        instance.description = validated_data.get('description', instance.description)
+        instance.description = validated_data.get(
+            'description', instance.description)
         instance.due_date = validated_data.get('due_date', instance.due_date)
         instance.save()
         return instance
@@ -68,7 +72,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Submission
-        fields = ('id','assignment', 'student', 'created_at',
+        fields = ('id', 'assignment', 'student', 'created_at',
                   'grade', 'grade_comment', 'status')
 
     def get_assignment(self, obj):
@@ -81,7 +85,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
         if 'grade' in validated_data:
             instance.status = Submission.GRADED
         instance.grade = validated_data.get('grade', instance.grade)
-        instance.grade_comment = validated_data.get('grade_comment', instance.grade_comment)
+        instance.grade_comment = validated_data.get(
+            'grade_comment', instance.grade_comment)
         instance.save()
         return instance
 
@@ -92,11 +97,12 @@ class SubmissionSerializer(serializers.ModelSerializer):
 class EnrollmentSerializer(serializers.ModelSerializer):
     course = serializers.SerializerMethodField()
     student = serializers.SerializerMethodField()
-    period = serializers.IntegerField(required=True, validators=[period_validator])
+    period = serializers.IntegerField(
+        required=True, validators=[period_validator])
 
     class Meta:
         model = Enrollment
-        fields = ('id','student', 'course', 'period')
+        fields = ('id', 'student', 'course', 'period')
 
     def get_course(self, obj):
         return CourseSerializer(obj.course).data

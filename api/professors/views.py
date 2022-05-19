@@ -8,6 +8,7 @@ from ..serializers import CourseSerializer, AssignmentSerializer, SubmissionSeri
 from ..permissions import isProfessor, isProfessorAndOwnsCourse
 from ..models import Assignment, Professor, Course, File, Submission, Enrollment
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
 def create_course(request):
@@ -49,6 +50,7 @@ def create_assignment(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
 def update_assignment(request, id):
@@ -56,12 +58,14 @@ def update_assignment(request, id):
     Update an assignment
     """
     assignment = Assignment.objects.get(id=id)
-    serializer = AssignmentSerializer(assignment, data=request.data, partial=True)
+    serializer = AssignmentSerializer(
+        assignment, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["PUT"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
@@ -73,13 +77,15 @@ def update_submission(request, id):
         submission = Submission.objects.get(id=id)
     except:
         return Response({"error": "Submission does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = SubmissionSerializer(submission, data=request.data, partial=True)
+
+    serializer = SubmissionSerializer(
+        submission, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, isProfessor])
@@ -93,6 +99,7 @@ def get_submissions_for_assignment(request, assignment_id):
         return Response({"error": "Assignment does not exist"}, status=status.HTTP_400_BAD_REQUEST)
     submissions = Submission.objects.filter(assignment=assignment)
     return Response(SubmissionSerializer(submissions, many=True).data)
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])

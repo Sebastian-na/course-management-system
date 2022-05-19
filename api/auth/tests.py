@@ -39,11 +39,12 @@ class TestViewRegisterProfessor(TestCase):
                                     'first_name': "John", 'last_name': "Doe", 'email': "example8@gmail.com"})
         self.assertEqual(response.status_code, 400)
 
+
 class TestViewRegisterStudent(TestCase):
     def setUp(self) -> None:
         self.client.post('/api/auth/register/student/', {
                          'first_name': "John", 'last_name': "Doe", 'email': "example@gmail.com", 'password': "password"})
-    
+
     def test_register_student(self):
         response = self.client.post('/api/auth/register/student/', {
                                     'first_name': "John", 'last_name': "Doe", 'email': "example2@gmail.com", 'password': "password"})

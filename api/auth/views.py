@@ -5,6 +5,7 @@ from rest_framework import status
 from ..serializers import UserSerializer
 from ..models import User
 
+
 @api_view(["POST"])
 def register_professor(request):
     """

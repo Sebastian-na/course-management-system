@@ -17,12 +17,13 @@ def enroll_student(request):
     Enroll a student in a course
     """
     student = Student.objects.get(user=request.user)
-    try: 
+    try:
         course = Course.objects.get(id=request.data.get("course_id"))
     except:
         return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = EnrollmentSerializer(data=request.data, context={'student': student, 'course': course})
+    serializer = EnrollmentSerializer(data=request.data, context={
+                                      'student': student, 'course': course})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -45,7 +46,8 @@ def create_submission(request):
     data = QueryDict.copy(request.data)
     data["student"] = student
     data["assignment"] = assignment
-    serializer = SubmissionSerializer(data=request.data, context={'student': student, 'assignment': assignment})
+    serializer = SubmissionSerializer(data=request.data, context={
+                                      'student': student, 'assignment': assignment})
     if serializer.is_valid():
         submission = serializer.save()
         for file in request.FILES.values():
