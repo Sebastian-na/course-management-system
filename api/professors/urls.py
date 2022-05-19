@@ -10,4 +10,6 @@ urlpatterns = [
          views.update_submission, name="update_submission"),
     path("submissions/<int:assignment_id>/", views.get_submissions_for_assignment,
          name="get_submissions_for_assignment"),
+    path("course/", views.get_students_enrolled_in_course,
+         name="get_students_enroll_in_course"),
 ]

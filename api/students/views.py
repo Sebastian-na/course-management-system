@@ -56,17 +56,3 @@ def create_submission(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
-def get_students_enrolled_in_course(request):
-    """
-    Get all students enrolled in a course
-    """
-    try:
-        course = Course.objects.get(id=request.data["course_id"])
-    except:
-        return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-    enrollments = Enrollment.objects.filter(course=course)
-    return Response(EnrollmentSerializer(enrollments, many=True).data)

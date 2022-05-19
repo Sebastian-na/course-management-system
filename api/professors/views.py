@@ -4,9 +4,9 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from ..serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer
+from ..serializers import CourseSerializer, AssignmentSerializer, SubmissionSerializer, EnrollmentSerializer
 from ..permissions import isProfessor, isProfessorAndOwnsCourse
-from ..models import Assignment, Professor, Course, File, Submission
+from ..models import Assignment, Professor, Course, File, Submission, Enrollment
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, isProfessor])
@@ -93,3 +93,16 @@ def get_submissions_for_assignment(request, assignment_id):
         return Response({"error": "Assignment does not exist"}, status=status.HTTP_400_BAD_REQUEST)
     submissions = Submission.objects.filter(assignment=assignment)
     return Response(SubmissionSerializer(submissions, many=True).data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated, isProfessorAndOwnsCourse])
+def get_students_enrolled_in_course(request):
+    """
+    Get all students enrolled in a course
+    """
+    try:
+        course = Course.objects.get(id=request.data["course_id"])
+    except:
+        return Response({"error": "Course does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+    enrollments = Enrollment.objects.filter(course=course)
+    return Response(EnrollmentSerializer(enrollments, many=True).data)
